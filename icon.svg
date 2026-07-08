@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#FAF3E7"/>
+  <rect x="24" y="24" width="464" height="464" rx="80" fill="none" stroke="#E8574B" stroke-width="14" stroke-dasharray="30 18"/>
+  <rect x="24" y="24" width="464" height="464" rx="80" fill="none" stroke="#2E9C97" stroke-width="14" stroke-dasharray="30 18" stroke-dashoffset="24"/>
+  <g transform="translate(256 266) rotate(-18)">
+    <path d="M-150 20 L150 -60 L60 10 L150 -60 L20 90 L-10 20 Z" fill="#E8574B" stroke="#2B2118" stroke-width="8" stroke-linejoin="round"/>
+  </g>
+  <circle cx="380" cy="150" r="46" fill="#E8A33D" stroke="#2B2118" stroke-width="8"/>
+  <text x="380" y="166" font-family="Georgia, serif" font-size="44" font-weight="700" text-anchor="middle" fill="#2B2118">W</text>
+</svg>

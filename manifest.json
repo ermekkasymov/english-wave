@@ -1,0 +1,14 @@
+{
+  "name": "English Wave — тренажёр английского",
+  "short_name": "English Wave",
+  "description": "Персональный тренажёр английского языка: словарь, чтение, аудирование, письмо, говорение, кино-сцены и ежемесячный тест прогресса.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FAF3E7",
+  "theme_color": "#E8574B",
+  "lang": "ru",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

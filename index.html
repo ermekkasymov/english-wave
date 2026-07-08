@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>English Wave — тренажёр английского</title>
+<meta name="description" content="Персональный тренажёр английского языка: словарь, чтение, аудирование, письмо, говорение и кино-сцены.">
+<meta name="theme-color" content="#E8574B">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --coral:#E8574B; --coral-dark:#C74236;
+    --mustard:#D9A441; --mustard-dark:#B4832A;
+    --turquoise:#2E9C97; --turquoise-dark:#1F7671;
+    --cream:#FAF3E7; --paper:#FFFDF8;
+    --ink:#2B2118; --ink-soft:#6B5C4C;
+    --line:#E4D8C3;
+    --radius:18px;
+    --shadow:0 4px 18px rgba(43,33,24,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh;
+    padding-bottom:40px;
+  }
+  h1,h2,h3{font-family:'Fraunces',serif; margin:0 0 .4em; font-weight:600}
+  .mono{font-family:'JetBrains Mono',monospace}
+  a{color:var(--turquoise-dark)}
+  button{font-family:inherit; cursor:pointer}
+  .wrap{max-width:760px; margin:0 auto; padding:14px}
+
+  /* ---- airmail striped frame ---- */
+  .airmail-frame{
+    padding:7px;
+    border-radius:24px;
+    background:repeating-linear-gradient(135deg,
+      var(--coral) 0 16px, var(--paper) 16px 30px,
+      var(--turquoise) 30px 46px, var(--paper) 46px 60px);
+    box-shadow:var(--shadow);
+    margin-bottom:16px;
+  }
+  .airmail-inner{
+    background:var(--paper);
+    border-radius:18px;
+    padding:18px 20px;
+    position:relative;
+  }
+
+  /* ---- header ---- */
+  header.airmail-frame{margin-bottom:18px}
+  .header-top{display:flex; align-items:flex-start; justify-content:space-between; gap:10px}
+  .brand{display:flex; align-items:center; gap:10px}
+  .brand-plane{font-size:30px; transform:rotate(-8deg); display:inline-block}
+  .brand h1{font-size:1.5rem; line-height:1.1}
+  .brand p{margin:2px 0 0; color:var(--ink-soft); font-size:.82rem}
+
+  .stamp{
+    width:60px; height:72px; background:var(--paper);
+    border:3px dashed var(--ink-soft); border-radius:3px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    transform:rotate(6deg); flex:none;
+    box-shadow:0 2px 6px rgba(0,0,0,.12);
+  }
+  .stamp .flame{font-size:20px; line-height:1}
+  .stamp .num{font-size:1.1rem; font-weight:700}
+  .stamp .lbl{font-size:.55rem; color:var(--ink-soft); letter-spacing:.03em}
+
+  .icon-btn{
+    background:none; border:2px solid var(--line); border-radius:12px;
+    width:40px; height:40px; font-size:18px; display:flex; align-items:center; justify-content:center;
+    color:var(--ink);
+  }
+  .icon-btn:hover{border-color:var(--turquoise)}
+
+  .header-controls{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:14px; flex-wrap:wrap}
+  .level-switch{display:flex; gap:6px; background:var(--cream); border-radius:12px; padding:4px}
+  .level-switch button{
+    border:none; background:transparent; padding:7px 12px; border-radius:9px;
+    font-size:.82rem; font-weight:600; color:var(--ink-soft);
+  }
+  .level-switch button.active{background:var(--paper); color:var(--coral-dark); box-shadow:var(--shadow)}
+
+  .timer-badge{display:flex; align-items:center; gap:8px; font-size:.8rem; color:var(--ink-soft)}
+  .timer-bar{width:70px; height:8px; border-radius:5px; background:var(--line); overflow:hidden}
+  .timer-bar > i{display:block; height:100%; background:var(--turquoise); width:0%}
+  .timer-bar.warn > i{background:var(--mustard)}
+  .timer-bar.limit > i{background:var(--coral)}
+
+  /* ---- tabs ---- */
+  nav.tabs{
+    display:grid; grid-template-columns:repeat(7,1fr); gap:6px;
+    margin-bottom:16px;
+  }
+  nav.tabs button{
+    border:2px solid var(--line); background:var(--paper); border-radius:14px;
+    padding:10px 4px; font-size:.72rem; font-weight:600; color:var(--ink-soft);
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    min-height:56px;
+  }
+  nav.tabs button .em{font-size:1.15rem}
+  nav.tabs button.active{border-color:var(--coral); color:var(--coral-dark); background:#FFF4EF}
+
+  section.panel{display:none}
+  section.panel.active{display:block}
+
+  .card{background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); padding:16px; margin-bottom:12px; box-shadow:var(--shadow)}
+  .muted{color:var(--ink-soft)}
+  .pill{display:inline-block; padding:2px 10px; border-radius:999px; font-size:.72rem; font-weight:600; background:var(--cream); color:var(--ink-soft)}
+
+  .btn{
+    border:none; border-radius:12px; padding:11px 18px; font-weight:600; font-size:.92rem;
+    background:var(--coral); color:#fff; min-height:44px;
+  }
+  .btn:hover{background:var(--coral-dark)}
+  .btn.secondary{background:var(--turquoise)}
+  .btn.secondary:hover{background:var(--turquoise-dark)}
+  .btn.ghost{background:transparent; border:2px solid var(--line); color:var(--ink)}
+  .btn[disabled]{opacity:.5; cursor:not-allowed}
+  .btn-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
+
+  .speak-btn{
+    border:none; background:var(--turquoise); color:#fff; border-radius:50%;
+    width:38px; height:38px; font-size:16px; flex:none;
+  }
+  .speak-btn:hover{background:var(--turquoise-dark)}
+
+  textarea, input[type=text], input[type=password], select{
+    width:100%; border:2px solid var(--line); border-radius:12px; padding:10px 12px;
+    font-family:inherit; font-size:.95rem; background:var(--paper); color:var(--ink);
+  }
+  textarea{min-height:120px; resize:vertical}
+  label{font-size:.82rem; font-weight:600; color:var(--ink-soft); display:block; margin:10px 0 5px}
+
+  .word-card{border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:8px; cursor:pointer}
+  .word-card .head{display:flex; align-items:center; justify-content:space-between}
+  .word-card .word{font-weight:700; font-size:1.05rem}
+  .word-card .detail{display:none; margin-top:8px; padding-top:8px; border-top:1px dashed var(--line)}
+  .word-card.open .detail{display:block}
+
+  .q-block{margin-bottom:16px; padding-bottom:14px; border-bottom:1px dashed var(--line)}
+  .q-block:last-child{border-bottom:none}
+  .opt{
+    display:flex; align-items:center; gap:8px; border:2px solid var(--line); border-radius:12px;
+    padding:9px 12px; margin-top:6px; font-size:.9rem;
+  }
+  .opt:hover{border-color:var(--turquoise)}
+  .opt.correct{border-color:var(--turquoise); background:#EAF7F5}
+  .opt.wrong{border-color:var(--coral); background:#FDECEA}
+  .opt input{accent-color:var(--coral)}
+
+  .hidden-text{filter:blur(6px); user-select:none; transition:filter .3s}
+  .hidden-text.revealed{filter:none}
+
+  .word-token{padding:1px 3px; border-radius:5px}
+  .word-token.match{background:#DFF3EE; color:var(--turquoise-dark)}
+  .word-token.miss{background:#FBE4E1; color:var(--coral-dark); text-decoration:line-through}
+  .word-token.extra{color:var(--ink-soft); font-style:italic}
+
+  .banner{
+    background:linear-gradient(90deg,#FFF4E6,#FFEDE9); border:1px solid var(--mustard);
+    border-radius:14px; padding:12px 14px; margin-bottom:14px; font-size:.88rem;
+  }
+
+  .dialog-line{margin-bottom:10px; display:flex; gap:8px; align-items:flex-start}
+  .dialog-line .bubble{flex:1; background:var(--cream); border-radius:14px; padding:9px 12px}
+  .dialog-line .speaker{font-weight:700; font-size:.78rem; color:var(--coral-dark); margin-bottom:2px}
+  .dialog-line .translation{display:none; color:var(--ink-soft); font-size:.85rem; margin-top:4px}
+  .dialog-line.show-tr .translation{display:block}
+
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(43,33,24,.45); display:none;
+    align-items:center; justify-content:center; z-index:50; padding:16px;
+  }
+  .modal-backdrop.open{display:flex}
+  .modal{background:var(--paper); border-radius:18px; padding:20px; max-width:420px; width:100%; box-shadow:var(--shadow)}
+
+  .toast-wrap{position:fixed; bottom:16px; left:50%; transform:translateX(-50%); z-index:60; display:flex; flex-direction:column; gap:8px; align-items:center; width:100%; padding:0 16px}
+  .toast{background:var(--ink); color:var(--paper); padding:10px 16px; border-radius:12px; font-size:.86rem; box-shadow:var(--shadow); max-width:420px}
+  .toast.err{background:var(--coral-dark)}
+
+  .spinner{display:inline-block; width:16px; height:16px; border:3px solid var(--line); border-top-color:var(--coral); border-radius:50%; animation:spin .7s linear infinite; vertical-align:middle}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .empty-state{text-align:center; padding:24px 10px; color:var(--ink-soft)}
+  .empty-state .em{font-size:2.4rem; display:block; margin-bottom:8px}
+
+  .score-num{font-family:'JetBrains Mono',monospace; font-weight:700}
+
+  .chart-wrap{overflow-x:auto}
+  .history-list{list-style:none; padding:0; margin:10px 0 0}
+  .history-list li{display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px dashed var(--line); font-size:.88rem}
+
+  .skill-bars .row{display:flex; align-items:center; gap:10px; margin-bottom:8px}
+  .skill-bars .row .name{width:100px; font-size:.82rem; color:var(--ink-soft); flex:none}
+  .skill-bars .track{flex:1; height:10px; border-radius:6px; background:var(--line); overflow:hidden}
+  .skill-bars .track > i{display:block; height:100%; background:var(--turquoise)}
+  .skill-bars .row .val{width:70px; text-align:right; font-size:.82rem; flex:none}
+
+  footer{text-align:center; color:var(--ink-soft); font-size:.76rem; margin-top:22px; padding:0 14px}
+
+  @media(max-width:520px){
+    nav.tabs{grid-template-columns:repeat(4,1fr)}
+    .brand h1{font-size:1.2rem}
+    .stamp{width:52px; height:62px}
+    .header-controls{flex-direction:column; align-items:stretch}
+    .timer-badge{justify-content:space-between}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="airmail-frame">
+    <div class="airmail-inner">
+      <div class="header-top">
+        <div class="brand">
+          <span class="brand-plane">✈️</span>
+          <div>
+            <h1>English&nbsp;Wave</h1>
+            <p>твой персональный тренажёр английского</p>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:flex-start">
+          <button class="icon-btn" id="settingsBtn" title="Настройки" aria-label="Настройки">⚙️</button>
+          <div class="stamp" title="Дней подряд">
+            <span class="flame">🔥</span>
+            <span class="num mono" id="streakNum">0</span>
+            <span class="lbl">СТРИК</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <div class="level-switch" id="levelSwitch">
+          <button data-level="beginner">Начальный</button>
+          <button data-level="intermediate">Средний</button>
+          <button data-level="advanced">Продвинутый</button>
+        </div>
+        <div class="timer-badge">
+          <span id="timerLabel" class="mono">0 / 30 мин</span>
+          <div class="timer-bar" id="timerBar"><i></i></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="vocab" class="active"><span class="em">📚</span>Словарь</button>
+    <button data-tab="reading"><span class="em">📖</span>Чтение</button>
+    <button data-tab="listening"><span class="em">🎧</span>Аудиров.</button>
+    <button data-tab="writing"><span class="em">✍️</span>Письмо</button>
+    <button data-tab="speaking"><span class="em">🗣️</span>Говорение</button>
+    <button data-tab="movies"><span class="em">🎬</span>Кино</button>
+    <button data-tab="progress"><span class="em">📊</span>Прогресс</button>
+  </nav>
+
+  <main>
+    <!-- VOCAB -->
+    <section class="panel active" id="panel-vocab">
+      <div class="card">
+        <h2>📚 Словарь</h2>
+        <p class="muted">6 новых слов и фраз под твой уровень. Нажми на карточку, чтобы увидеть перевод и пример.</p>
+        <div class="btn-row"><button class="btn" id="vocabGenBtn">Сгенерировать слова</button></div>
+      </div>
+      <div id="vocabList"></div>
+    </section>
+
+    <!-- READING -->
+    <section class="panel" id="panel-reading">
+      <div class="card">
+        <h2>📖 Чтение</h2>
+        <p class="muted">Короткий текст под твой уровень + 3 вопроса на понимание.</p>
+        <div class="btn-row"><button class="btn" id="readingGenBtn">Сгенерировать текст</button></div>
+      </div>
+      <div id="readingBody"></div>
+    </section>
+
+    <!-- LISTENING -->
+    <section class="panel" id="panel-listening">
+      <div class="card">
+        <h2>🎧 Аудирование</h2>
+        <p class="muted">5 фраз живой речи. Сначала слушай, потом отвечай — текст откроется после ответа.</p>
+        <div class="btn-row"><button class="btn" id="listeningGenBtn">Сгенерировать фразы</button></div>
+      </div>
+      <div id="listeningBody"></div>
+    </section>
+
+    <!-- WRITING -->
+    <section class="panel" id="panel-writing">
+      <div class="card">
+        <h2>✍️ Письмо</h2>
+        <p class="muted">Тема и задание на русском — пиши ответ на английском, получи тёплую обратную связь.</p>
+        <div class="btn-row"><button class="btn" id="writingGenBtn">Новая тема</button></div>
+      </div>
+      <div id="writingBody"></div>
+    </section>
+
+    <!-- SPEAKING -->
+    <section class="panel" id="panel-speaking">
+      <div class="card">
+        <h2>🗣️ Говорение</h2>
+        <p class="muted">Бытовая ситуация + 5 фраз. Слушай, повторяй вслух в микрофон — получишь оценку и совет.</p>
+        <div class="btn-row"><button class="btn" id="speakingGenBtn">Новая ситуация</button></div>
+      </div>
+      <div id="speakingBody"></div>
+    </section>
+
+    <!-- MOVIES -->
+    <section class="panel" id="panel-movies">
+      <div class="card">
+        <h2>🎬 Кино-сцены</h2>
+        <p class="muted">Оригинальная сцена, вдохновлённая жанром или атмосферой любимого фильма — без реальных цитат.</p>
+        <label>Жанр</label>
+        <select id="movieGenre">
+          <option value="romance">Романтика</option>
+          <option value="action">Боевик</option>
+          <option value="detective">Детектив</option>
+          <option value="drama">Драма</option>
+          <option value="comedy">Комедия</option>
+        </select>
+        <label>Любимый фильм (необязательно, для атмосферы)</label>
+        <input type="text" id="movieTitle" placeholder="Например: Ла-Ла Ленд">
+        <div class="btn-row"><button class="btn" id="movieGenBtn">Сгенерировать сцену</button></div>
+      </div>
+      <div id="movieBody"></div>
+    </section>
+
+    <!-- PROGRESS -->
+    <section class="panel" id="panel-progress">
+      <div id="testBanner"></div>
+      <div class="card">
+        <h2>📊 Прогресс</h2>
+        <p class="muted">Раз в месяц — тест из 12 вопросов, чтобы объективно увидеть динамику по навыкам.</p>
+        <div class="btn-row"><button class="btn" id="testStartBtn">Начать тест</button></div>
+      </div>
+      <div id="testBody"></div>
+      <div class="card" id="historyCard" style="display:none">
+        <h3>История результатов</h3>
+        <div class="chart-wrap"><svg id="progressChart" width="700" height="140" viewBox="0 0 700 140"></svg></div>
+        <ul class="history-list" id="historyList"></ul>
+      </div>
+    </section>
+  </main>
+
+  <div class="card">
+    <h3 style="font-size:.95rem">🔔 Напоминания</h3>
+    <p class="muted" style="font-size:.85rem">Раз в 20 минут пришлём напоминание позаниматься, если сегодня ещё не было активности. Работает, только пока вкладка открыта — добавь страницу на домашний экран и поставь будильник для надёжности.</p>
+    <button class="btn ghost" id="notifBtn">Включить напоминания</button>
+  </div>
+
+  <footer>
+    English Wave · весь контент генерируется динамически, без копирайтных материалов · данные хранятся только в твоём браузере
+  </footer>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-backdrop" id="settingsModal">
+  <div class="modal">
+    <h3>⚙️ Настройки</h3>
+    <p class="muted" style="font-size:.85rem">Нужен ключ Anthropic API (claude.com/settings/keys). Ключ хранится только в этом браузере (localStorage) и отправляется напрямую в Anthropic API — на сервер приложения он не попадает.</p>
+    <label>API-ключ Anthropic</label>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-...">
+    <label>Модель</label>
+    <select id="modelSelect">
+      <option value="claude-sonnet-5">Claude Sonnet 5 (рекомендуется)</option>
+      <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (быстрее и дешевле)</option>
+      <option value="claude-opus-4-8">Claude Opus 4.8 (самое высокое качество)</option>
+    </select>
+    <div class="btn-row">
+      <button class="btn" id="saveSettingsBtn">Сохранить</button>
+      <button class="btn ghost" id="closeSettingsBtn">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+(() => {
+'use strict';
+
+/* ============ storage helpers ============ */
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v===null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+const todayStr = () => new Date().toISOString().slice(0,10);
+
+/* ============ level ============ */
+const LEVEL_LABEL = { beginner:'начальный (A1-A2)', intermediate:'средний (B1-B2)', advanced:'продвинутый (C1-C2)' };
+let level = LS.get('ew_level', 'intermediate');
+function setLevel(l){
+  level = l; LS.set('ew_level', l);
+  document.querySelectorAll('#levelSwitch button').forEach(b => b.classList.toggle('active', b.dataset.level===l));
+}
+document.getElementById('levelSwitch').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return; setLevel(b.dataset.level);
+});
+setLevel(level);
+
+/* ============ streak ============ */
+function updateStreak(){
+  const last = LS.get('ew_last_visit', null);
+  let streak = LS.get('ew_streak', 0);
+  const today = todayStr();
+  if(last !== today){
+    if(last){
+      const diffDays = Math.round((new Date(today) - new Date(last)) / 86400000);
+      streak = diffDays === 1 ? streak + 1 : 1;
+    } else {
+      streak = 1;
+    }
+    LS.set('ew_streak', streak);
+    LS.set('ew_last_visit', today);
+  }
+  document.getElementById('streakNum').textContent = streak;
+}
+updateStreak();
+
+/* ============ session timer (30 min/day) ============ */
+const LIMIT_SEC = 30*60;
+function loadDaily(){
+  let d = LS.get('ew_daily_time', null);
+  if(!d || d.date !== todayStr()) d = { date: todayStr(), seconds: 0 };
+  return d;
+}
+let daily = loadDaily();
+function renderTimer(){
+  const min = Math.floor(daily.seconds/60);
+  document.getElementById('timerLabel').textContent = `${min} / 30 мин`;
+  const bar = document.getElementById('timerBar');
+  const pct = Math.min(100, (daily.seconds/LIMIT_SEC)*100);
+  bar.querySelector('i').style.width = pct+'%';
+  bar.classList.toggle('warn', daily.seconds >= LIMIT_SEC*0.83 && daily.seconds < LIMIT_SEC);
+  bar.classList.toggle('limit', daily.seconds >= LIMIT_SEC);
+}
+renderTimer();
+let warnedApproach = false, warnedLimit = false;
+setInterval(() => {
+  if(document.visibilityState !== 'visible') return;
+  daily = loadDaily();
+  daily.seconds += 10;
+  LS.set('ew_daily_time', daily);
+  renderTimer();
+  if(daily.seconds >= LIMIT_SEC && !warnedLimit){
+    warnedLimit = true;
+    toast('Ты позанимался(ась) уже 30 минут сегодня 🎉 Дальше — по желанию, лимит не блокирует функции.', 'info');
+  } else if(daily.seconds >= LIMIT_SEC*0.83 && !warnedApproach){
+    warnedApproach = true;
+    toast('Приближаешься к дневному лимиту 30 минут — скоро можно сделать перерыв 🙂', 'info');
+  }
+}, 10000);
+
+/* ============ notifications ============ */
+document.getElementById('notifBtn').addEventListener('click', async () => {
+  if(!('Notification' in window)){ toast('Браузер не поддерживает уведомления', 'err'); return; }
+  const perm = await Notification.requestPermission();
+  if(perm === 'granted'){
+    toast('Напоминания включены — работают, пока вкладка открыта 👍');
+    LS.set('ew_notif', true);
+    startNotifLoop();
+  } else {
+    toast('Разрешение на уведомления не выдано', 'err');
+  }
+});
+function startNotifLoop(){
+  if(window.__notifLoopStarted) return;
+  window.__notifLoopStarted = true;
+  setInterval(() => {
+    const d = loadDaily();
+    if(d.seconds === 0 && Notification.permission === 'granted'){
+      new Notification('English Wave', { body: 'Пора позаниматься английским 5–10 минут 🌊', icon:'icon.svg' });
+    }
+  }, 20*60*1000);
+}
+if(LS.get('ew_notif', false) && Notification.permission === 'granted') startNotifLoop();
+
+/* ============ tabs ============ */
+document.getElementById('tabs').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#tabs button').forEach(x => x.classList.toggle('active', x===b));
+  document.querySelectorAll('section.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-'+b.dataset.tab));
+});
+
+/* ============ toast ============ */
+function toast(msg, type){
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = 'toast' + (type==='err' ? ' err' : '');
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 5200);
+}
+
+/* ============ settings ============ */
+const settingsModal = document.getElementById('settingsModal');
+function openSettings(){
+  document.getElementById('apiKeyInput').value = LS.get('ew_api_key', '') || '';
+  document.getElementById('modelSelect').value = LS.get('ew_model', 'claude-sonnet-5');
+  settingsModal.classList.add('open');
+}
+document.getElementById('settingsBtn').addEventListener('click', openSettings);
+document.getElementById('closeSettingsBtn').addEventListener('click', () => settingsModal.classList.remove('open'));
+document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+  LS.set('ew_api_key', document.getElementById('apiKeyInput').value.trim());
+  LS.set('ew_model', document.getElementById('modelSelect').value);
+  settingsModal.classList.remove('open');
+  toast('Настройки сохранены');
+});
+if(!LS.get('ew_api_key', '')) setTimeout(openSettings, 400);
+
+/* ============ Claude API ============ */
+async function callClaude(userPrompt, systemPrompt, maxTokens){
+  const apiKey = LS.get('ew_api_key', '');
+  if(!apiKey){ openSettings(); throw new Error('Сначала укажи API-ключ в настройках'); }
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: LS.get('ew_model', 'claude-sonnet-5'),
+      max_tokens: maxTokens || 1200,
+      system: systemPrompt,
+      messages: [{ role:'user', content: userPrompt }]
+    })
+  });
+  if(!res.ok){
+    const errText = await res.text().catch(()=> '');
+    throw new Error(`Ошибка API (${res.status}). Проверь ключ в настройках. ${errText.slice(0,150)}`);
+  }
+  const data = await res.json();
+  return (data.content && data.content[0] && data.content[0].text) || '';
+}
+function extractJSON(text){
+  let t = text.trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+  const first = Math.min(...['{','['].map(c => { const i = t.indexOf(c); return i===-1 ? Infinity : i; }));
+  const lastCurly = t.lastIndexOf('}'), lastSquare = t.lastIndexOf(']');
+  const last = Math.max(lastCurly, lastSquare);
+  if(first !== Infinity && last !== -1) t = t.slice(first, last+1);
+  return JSON.parse(t);
+}
+const JSON_SYSTEM = 'Ты — опытный преподаватель английского языка. Отвечай СТРОГО валидным JSON без markdown-разметки, без ```` ```` ```` и без каких-либо пояснений вне JSON.';
+
+function withLoading(btn, fn){
+  return async (...args) => {
+    const orig = btn.innerHTML;
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Генерирую...';
+    try{ await fn(...args); }
+    catch(err){ console.error(err); toast(err.message || 'Что-то пошло не так', 'err'); }
+    finally{ btn.disabled = false; btn.innerHTML = orig; }
+  };
+}
+
+/* ============ TTS ============ */
+function speak(text){
+  if(!('speechSynthesis' in window)){ toast('Браузер не поддерживает озвучку', 'err'); return; }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; u.rate = 0.95;
+  window.speechSynthesis.speak(u);
+}
+function speakBtn(text){
+  const b = document.createElement('button');
+  b.className = 'speak-btn'; b.innerHTML = '🔊'; b.title = 'Прослушать';
+  b.addEventListener('click', (e) => { e.stopPropagation(); speak(text); });
+  return b;
+}
+
+/* ============ word-level LCS align (for speaking practice) ============ */
+function normWords(s){ return s.toLowerCase().replace(/[^a-z0-9'\s]/g,'').split(/\s+/).filter(Boolean); }
+function lcsAlign(target, spoken){
+  const n = target.length, m = spoken.length;
+  const dp = Array.from({length:n+1}, () => new Array(m+1).fill(0));
+  for(let i=1;i<=n;i++) for(let j=1;j<=m;j++){
+    dp[i][j] = target[i-1]===spoken[j-1] ? dp[i-1][j-1]+1 : Math.max(dp[i-1][j], dp[i][j-1]);
+  }
+  let i=n, j=m; const matched = new Set();
+  while(i>0 && j>0){
+    if(target[i-1]===spoken[j-1]){ matched.add(i-1); i--; j--; }
+    else if(dp[i-1][j] >= dp[i][j-1]) i--; else j--;
+  }
+  return { matched, count: dp[n][m] };
+}
+
+/* ================= VOCAB ================= */
+const vocabGenBtn = document.getElementById('vocabGenBtn');
+vocabGenBtn.addEventListener('click', withLoading(vocabGenBtn, async () => {
+  const prompt = `Сгенерируй 6 новых английских слов или устойчивых фраз для ученика с уровнем ${LEVEL_LABEL[level]}. Слова должны быть разнообразными по теме и полезными для повседневного общения. Верни JSON-массив из ровно 6 объектов: {"word":"...","translation":"...(русский)","example":"...(пример-предложение на английском)","exampleTranslation":"...(перевод примера на русский)"}.`;
+  const raw = await callClaude(prompt, JSON_SYSTEM, 1200);
+  const words = extractJSON(raw);
+  const list = document.getElementById('vocabList');
+  list.innerHTML = '';
+  words.forEach(w => {
+    const card = document.createElement('div');
+    card.className = 'word-card';
+    card.innerHTML = `
+      <div class="head">
+        <span class="word">${esc(w.word)}</span>
+        <span class="muted">▾</span>
+      </div>
+      <div class="detail">
+        <p><strong>Перевод:</strong> ${esc(w.translation)}</p>
+        <p><strong>Пример:</strong> <em>${esc(w.example)}</em><br><span class="muted">${esc(w.exampleTranslation)}</span></p>
+      </div>`;
+    card.addEventListener('click', () => card.classList.toggle('open'));
+    const detail = card.querySelector('.detail');
+    const row1 = document.createElement('div'); row1.style.marginTop='6px';
+    const sb1 = speakBtn(w.word); const sb2 = speakBtn(w.example);
+    const sb1wrap = document.createElement('span'); sb1wrap.style.marginRight='8px'; sb1wrap.appendChild(sb1);
+    row1.appendChild(sb1wrap); row1.appendChild(sb2);
+    detail.appendChild(row1);
+    list.appendChild(card);
+  });
+}));
+
+/* ================= READING ================= */
+const readingGenBtn = document.getElementById('readingGenBtn');
+readingGenBtn.addEventListener('click', withLoading(readingGenBtn, async () => {
+  const prompt = `Напиши короткий текст на английском (120-200 слов) на бытовую тему, интересную и жизненную, для ученика уровня ${LEVEL_LABEL[level]}. Затем составь ровно 3 вопроса на понимание текста, каждый с 4 вариантами ответа (multiple choice), один верный. Верни JSON: {"text":"...","questions":[{"question":"...","options":["...","...","...","..."],"correctIndex":0}]}.`;
+  const raw = await callClaude(prompt, JSON_SYSTEM, 1500);
+  const data = extractJSON(raw);
+  renderReading(data);
+}));
+function renderReading(data){
+  const body = document.getElementById('readingBody');
+  body.innerHTML = '';
+  const textCard = document.createElement('div'); textCard.className = 'card';
+  textCard.innerHTML = `<h3>Текст</h3><p>${esc(data.text)}</p>`;
+  body.appendChild(textCard);
+
+  const qCard = document.createElement('div'); qCard.className = 'card';
+  qCard.innerHTML = '<h3>Вопросы на понимание</h3>';
+  data.questions.forEach((q, qi) => {
+    const block = document.createElement('div'); block.className = 'q-block';
+    block.innerHTML = `<p><strong>${qi+1}. ${esc(q.question)}</strong></p>`;
+    q.options.forEach((opt, oi) => {
+      const label = document.createElement('label'); label.className = 'opt'; label.style.fontWeight='400';
+      label.innerHTML = `<input type="radio" name="read-q${qi}" value="${oi}"> <span>${esc(opt)}</span>`;
+      block.appendChild(label);
+    });
+    block.dataset.correct = q.correctIndex;
+    qCard.appendChild(block);
+  });
+  const checkBtn = document.createElement('button'); checkBtn.className = 'btn secondary'; checkBtn.textContent = 'Проверить';
+  checkBtn.style.marginTop = '10px';
+  checkBtn.addEventListener('click', () => {
+    qCard.querySelectorAll('.q-block').forEach(block => {
+      const correct = Number(block.dataset.correct);
+      const opts = block.querySelectorAll('.opt');
+      const checked = block.querySelector('input:checked');
+      opts.forEach((o, oi) => {
+        if(oi === correct) o.classList.add('correct');
+        else if(checked && Number(checked.value) === oi) o.classList.add('wrong');
+      });
+    });
+  });
+  qCard.appendChild(checkBtn);
+  body.appendChild(qCard);
+}
+
+/* ================= LISTENING ================= */
+const listeningGenBtn = document.getElementById('listeningGenBtn');
+listeningGenBtn.addEventListener('click', withLoading(listeningGenBtn, async () => {
+  const prompt = `Сгенерируй ровно 5 фраз, характерных для живой разговорной речи носителя английского языка, для ученика уровня ${LEVEL_LABEL[level]}. Для каждой фразы придумай короткий вопрос на понимание на русском языке с 3 вариантами ответа на русском. Верни JSON-массив: [{"phrase":"...(английская фраза)","translation":"...(перевод фразы)","question":"...(вопрос на русском)","options":["...","...","..."],"correctIndex":0}].`;
+  const raw = await callClaude(prompt, JSON_SYSTEM, 1400);
+  const items = extractJSON(raw);
+  renderListening(items);
+}));
+function renderListening(items){
+  const body = document.getElementById('listeningBody');
+  body.innerHTML = '';
+  items.forEach((it, idx) => {
+    const card = document.createElement('div'); card.className = 'card';
+    card.innerHTML = `
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px">
+        <span class="pill">Фраза ${idx+1}</span>
+      </div>
+      <p class="hidden-text" id="lt-${idx}">${esc(it.phrase)} — <span class="muted">${esc(it.translation)}</span></p>
+      <p><strong>${esc(it.question)}</strong></p>
+    `;
+    const speakRow = document.createElement('div');
+    speakRow.appendChild(speakBtn(it.phrase));
+    card.insertBefore(speakRow, card.querySelector('.hidden-text'));
+    it.options.forEach((opt, oi) => {
+      const label = document.createElement('label'); label.className = 'opt';
+      label.innerHTML = `<input type="radio" name="lst-q${idx}" value="${oi}"> <span>${esc(opt)}</span>`;
+      card.appendChild(label);
+    });
+    const checkBtn = document.createElement('button'); checkBtn.className = 'btn secondary'; checkBtn.style.marginTop='10px';
+    checkBtn.textContent = 'Ответить и открыть текст';
+    checkBtn.addEventListener('click', () => {
+      const correct = it.correctIndex;
+      const checked = card.querySelector('input:checked');
+      card.querySelectorAll('.opt').forEach((o, oi) => {
+        if(oi === correct) o.classList.add('correct');
+        else if(checked && Number(checked.value) === oi) o.classList.add('wrong');
+      });
+      document.getElementById(`lt-${idx}`).classList.add('revealed');
+    });
+    card.appendChild(checkBtn);
+    body.appendChild(card);
+  });
+}
+
+/* ================= WRITING ================= */
+let currentWritingTask = null;
+const writingGenBtn = document.getElementById('writingGenBtn');
+writingGenBtn.addEventListener('click', withLoading(writingGenBtn, async () => {
+  const prompt = `Придумай тему и короткое конкретное задание для письменной практики английского, сформулированное на русском языке, подходящее для ученика уровня ${LEVEL_LABEL[level]}, выполнимое за 5-10 минут. Верни JSON: {"topic":"...(короткое название темы)","taskRu":"...(формулировка задания на русском)"}.`;
+  const raw = await callClaude(prompt, JSON_SYSTEM, 500);
+  currentWritingTask = extractJSON(raw);
+  renderWriting();
+}));
+function renderWriting(){
+  const body = document.getElementById('writingBody');
+  body.innerHTML = `
+    <div class="card">
+      <h3>${esc(currentWritingTask.topic)}</h3>
+      <p>${esc(currentWritingTask.taskRu)}</p>
+      <label>Твой текст на английском</label>
+      <textarea id="writingInput" placeholder="Write here..."></textarea>
+      <div class="btn-row"><button class="btn" id="writingCheckBtn">Проверить</button></div>
+      <div id="writingFeedback"></div>
+    </div>`;
+  const checkBtn = document.getElementById('writingCheckBtn');
+  checkBtn.addEventListener('click', withLoading(checkBtn, async () => {
+    const text = document.getElementById('writingInput').value.trim();
+    if(!text){ toast('Сначала напиши текст', 'err'); return; }
+    const prompt = `Ты — тёплый, поддерживающий преподаватель английского. Ученик уровня ${LEVEL_LABEL[level]} выполнял задание: "${currentWritingTask.taskRu}". Вот его текст на английском:\n"""${text}"""\nДай обратную связь на русском языке: 1) короткая искренняя похвала, 2) исправленная версия текста (сохрани стиль и смысл ученика, аккуратно поправь ошибки), 3) 2-3 конкретных совета по улучшению. Тон дружелюбный и некритичный, без осуждения. Верни JSON: {"praise":"...","correctedText":"...(на английском)","tips":["...","...","..."]}.`;
+    const raw = await callClaude(prompt, JSON_SYSTEM, 900);
+    const fb = extractJSON(raw);
+    document.getElementById('writingFeedback').innerHTML = `
+      <div class="card" style="background:#FFF8EF; margin-top:12px">
+        <p>💬 ${esc(fb.praise)}</p>
+        <p><strong>Исправленная версия:</strong><br>${esc(fb.correctedText)}</p>
+        <p><strong>Советы:</strong></p>
+        <ul>${fb.tips.map(t => `<li>${esc(t)}</li>`).join('')}</ul>
+      </div>`;
+  }));
+}
+
+/* ================= SPEAKING ================= */
+let currentSituation = null;
+const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+const speakingGenBtn = document.getElementById('speakingGenBtn');
+speakingGenBtn.addEventListener('click', withLoading(speakingGenBtn, async () => {
+  const prompt = `Сгенерируй бытовую разговорную ситуацию и ровно 5 полезных фраз для неё на английском для ученика уровня ${LEVEL_LABEL[level]}. Верни JSON: {"situation":"...(описание ситуации на русском)","phrases":[{"phrase":"...(английская фраза)","translation":"...(перевод)"}]} (ровно 5 элементов phrases).`;
+  const raw = await callClaude(prompt, JSON_SYSTEM, 900);
+  currentSituation = extractJSON(raw);
+  renderSpeaking();
+}));
+function renderSpeaking(){
+  const body = document.getElementById('speakingBody');
+  body.innerHTML = `<div class="card"><h3>Ситуация</h3><p>${esc(currentSituation.situation)}</p></div>`;
+  if(!SpeechRecognitionAPI){
+    body.innerHTML += `<div class="banner">⚠️ Твой браузер не поддерживает распознавание речи. Рекомендуем использовать Chrome для практики произношения — прослушивание фраз при этом всё равно доступно.</div>`;
+  }
+  currentSituation.phrases.forEach((p, idx) => {
+    const card = document.createElement('div'); card.className = 'card';
+    card.innerHTML = `
+      <p><strong>${esc(p.phrase)}</strong><br><span class="muted">${esc(p.translation)}</span></p>
+      <div class="btn-row" id="sp-controls-${idx}"></div>
+      <div id="sp-result-${idx}"></div>
+    `;
+    const controls = card.querySelector(`#sp-controls-${idx}`);
+    controls.appendChild(speakBtn(p.phrase));
+    if(SpeechRecognitionAPI){
+      const micBtn = document.createElement('button');
+      micBtn.className = 'btn secondary'; micBtn.textContent = '🎤 Повторить';
+      micBtn.addEventListener('click', () => startMic(p.phrase, idx));
+      controls.appendChild(micBtn);
+    }
+    document.getElementById('speakingBody').appendChild(card);
+  });
+}
+function startMic(targetPhrase, idx){
+  const resultEl = document.getElementById(`sp-result-${idx}`);
+  resultEl.innerHTML = '<p class="muted"><span class="spinner"></span> Слушаю...</p>';
+  const rec = new SpeechRecognitionAPI();
+  rec.lang = 'en-US'; rec.interimResults = false; rec.maxAlternatives = 1;
+  rec.onresult = async (e) => {
+    const spokenText = e.results[0][0].transcript;
+    const targetWords = normWords(targetPhrase);
+    const spokenWords = normWords(spokenText);
+    const { matched, count } = lcsAlign(targetWords, spokenWords);
+    const html = targetWords.map((w, i) => `<span class="word-token ${matched.has(i) ? 'match' : 'miss'}">${esc(w)}</span>`).join(' ');
+    resultEl.innerHTML = `
+      <p>Ты сказал(а): <em>${esc(spokenText)}</em></p>
+      <p>${html}</p>
+      <p>Счёт: <span class="score-num">${count} из ${targetWords.length} слов</span></p>
+      <p id="sp-tip-${idx}" class="muted"><span class="spinner"></span> Получаю совет...</p>`;
+    try{
+      const prompt = `Ученик уровня ${LEVEL_LABEL[level]} пытался произнести фразу: "${targetPhrase}". Распознавание речи услышало: "${spokenText}". Совпало ${count} из ${targetWords.length} слов. Дай короткий (2-3 предложения) дружелюбный персональный совет на русском языке — что стоит отработать в произношении. Ответь простым текстом, без JSON.`;
+      const tip = await callClaude(prompt, 'Ты — тёплый, поддерживающий преподаватель английского произношения.', 300);
+      document.getElementById(`sp-tip-${idx}`).innerHTML = `💡 ${esc(tip)}`;
+    }catch(err){
+      document.getElementById(`sp-tip-${idx}`).textContent = '';
+    }
+  };
+  rec.onerror = () => { resultEl.innerHTML = '<p class="muted">Не удалось распознать речь. Попробуй ещё раз.</p>'; };
+  rec.start();
+}
+
+/* ================= MOVIES ================= */
+const movieGenBtn = document.getElementById('movieGenBtn');
+movieGenBtn.addEventListener('click', withLoading(movieGenBtn, async () => {
+  const genreSel = document.getElementById('movieGenre');
+  const genreLabel = genreSel.options[genreSel.selectedIndex].text;
+  const movieTitle = document.getElementById('movieTitle').value.trim();
+  const inspiration = movieTitle ? ` в атмосфере фильма "${movieTitle}" (НЕ копируй реплики, сюжет или цитаты фильма — используй его только как вдохновение для тона и атмосферы)` : '';
+  const prompt = `Придумай полностью ОРИГИНАЛЬНУЮ сцену в жанре "${genreLabel}"${inspiration} для ученика английского уровня ${LEVEL_LABEL[level]}. Два вымышленных персонажа (придумай им имена), 6-8 реплик диалога с элементами живой разговорной речи, включи 2-3 идиомы или фразовых глагола. ВАЖНО: не используй реальные цитаты из фильмов/сериалов — только придуманный тобой диалог. Верни JSON: {"characters":["Имя1","Имя2"],"lines":[{"speaker":"Имя1","text":"...(английский)","translation":"...(русский)"}],"idioms":[{"phrase":"...","meaning":"...(русский)"}]}.`;
+  const raw = await callClaude(prompt, JSON_SYSTEM, 1600);
+  const scene = extractJSON(raw);
+  renderMovie(scene, genreLabel, movieTitle);
+}));
+function renderMovie(scene, genreLabel, movieTitle){
+  const body = document.getElementById('movieBody');
+  body.innerHTML = '';
+  const dialogCard = document.createElement('div'); dialogCard.className = 'card';
+  dialogCard.innerHTML = `<h3>${esc(genreLabel)}${movieTitle ? ' · в духе «'+esc(movieTitle)+'»' : ''}</h3>`;
+  scene.lines.forEach(line => {
+    const row = document.createElement('div'); row.className = 'dialog-line';
+    row.innerHTML = `
+      <div class="bubble">
+        <div class="speaker">${esc(line.speaker)}</div>
+        <div>${esc(line.text)}</div>
+        <div class="translation">${esc(line.translation)}</div>
+      </div>`;
+    const btnWrap = document.createElement('div');
+    btnWrap.appendChild(speakBtn(line.text));
+    row.insertBefore(btnWrap, row.firstChild);
+    row.addEventListener('click', (e) => { if(e.target.closest('.speak-btn')) return; row.classList.toggle('show-tr'); });
+    dialogCard.appendChild(row);
+  });
+  body.appendChild(dialogCard);
+
+  if(scene.idioms && scene.idioms.length){
+    const idiomCard = document.createElement('div'); idiomCard.className = 'card';
+    idiomCard.innerHTML = '<h3>Идиомы и фразовые глаголы</h3>' +
+      scene.idioms.map(i => `<p><strong>${esc(i.phrase)}</strong> — ${esc(i.meaning)}</p>`).join('');
+    body.appendChild(idiomCard);
+  }
+
+  const query = encodeURIComponent(`${movieTitle || genreLabel} movie scene`);
+  const linkCard = document.createElement('div'); linkCard.className = 'card';
+  linkCard.innerHTML = `<a href="https://www.youtube.com/results?search_query=${query}" target="_blank" rel="noopener">🔗 Найти похожие сцены на YouTube</a>`;
+  body.appendChild(linkCard);
+}
+
+/* ================= PROGRESS / TEST ================= */
+function renderTestBanner(){
+  const history = LS.get('ew_test_history', []);
+  const banner = document.getElementById('testBanner');
+  const last = history[history.length-1];
+  const daysSince = last ? Math.floor((new Date() - new Date(last.date)) / 86400000) : Infinity;
+  if(!last || daysSince >= 30){
+    banner.innerHTML = `<div class="banner">📅 ${!last ? 'Ты ещё не проходил(а) месячный тест — самое время начать!' : `С последнего теста прошло ${daysSince} дн. — пора проверить прогресс!`}</div>`;
+  } else {
+    banner.innerHTML = '';
+  }
+}
+renderTestBanner();
+
+let currentTest = null;
+const testStartBtn = document.getElementById('testStartBtn');
+testStartBtn.addEventListener('click', withLoading(testStartBtn, async () => {
+  const prompt = `Составь тест из ровно 12 вопросов для проверки уровня английского ученика (уровень: ${LEVEL_LABEL[level]}): по 3 вопроса на каждый из навыков "vocab" (словарный запас), "grammar" (грамматика), "reading" (короткий контекст-предложение + вопрос на понимание), "listening" (короткая фраза для прослушивания — заполни поле listenText). Все вопросы — с 4 вариантами ответа, один верный. Верни JSON: {"questions":[{"skill":"vocab|grammar|reading|listening","question":"...","listenText":"...(строка с фразой для TTS только для skill=listening, иначе пустая строка)","options":["...","...","...","..."],"correctIndex":0}]} (ровно 12 объектов, по 3 на каждый skill).`;
+  const raw = await callClaude(prompt, JSON_SYSTEM, 2200);
+  currentTest = extractJSON(raw);
+  renderTest();
+}));
+function renderTest(){
+  const body = document.getElementById('testBody');
+  body.innerHTML = '<div class="card"><h3>Месячный тест</h3></div>';
+  const card = body.firstChild;
+  currentTest.questions.forEach((q, qi) => {
+    const block = document.createElement('div'); block.className = 'q-block';
+    block.innerHTML = `<p><span class="pill">${skillLabel(q.skill)}</span></p><p><strong>${qi+1}. ${esc(q.question)}</strong></p>`;
+    if(q.skill === 'listening' && q.listenText){
+      const row = document.createElement('div'); row.style.margin = '6px 0';
+      row.appendChild(speakBtn(q.listenText));
+      block.appendChild(row);
+    }
+    q.options.forEach((opt, oi) => {
+      const label = document.createElement('label'); label.className = 'opt';
+      label.innerHTML = `<input type="radio" name="test-q${qi}" value="${oi}"> <span>${esc(opt)}</span>`;
+      block.appendChild(label);
+    });
+    card.appendChild(block);
+  });
+  const submitBtn = document.createElement('button'); submitBtn.className = 'btn'; submitBtn.textContent = 'Завершить тест';
+  submitBtn.style.marginTop = '10px';
+  submitBtn.addEventListener('click', () => finishTest(card));
+  card.appendChild(submitBtn);
+}
+function skillLabel(s){
+  return { vocab:'Словарь', grammar:'Грамматика', reading:'Чтение', listening:'Аудирование' }[s] || s;
+}
+function finishTest(card){
+  const skills = { vocab:{c:0,t:0}, grammar:{c:0,t:0}, reading:{c:0,t:0}, listening:{c:0,t:0} };
+  let correctTotal = 0;
+  currentTest.questions.forEach((q, qi) => {
+    const checked = card.querySelector(`input[name="test-q${qi}"]:checked`);
+    const isCorrect = checked && Number(checked.value) === q.correctIndex;
+    skills[q.skill].t++;
+    if(isCorrect){ skills[q.skill].c++; correctTotal++; }
+  });
+  const overall = Math.round((correctTotal / currentTest.questions.length) * 100);
+  const skillPct = {};
+  Object.keys(skills).forEach(k => { skillPct[k] = skills[k].t ? Math.round((skills[k].c/skills[k].t)*100) : 0; });
+
+  const history = LS.get('ew_test_history', []);
+  const prev = history[history.length-1];
+  history.push({ date: todayStr(), overall, skills: skillPct });
+  LS.set('ew_test_history', history);
+
+  renderTestResult(overall, skillPct, prev);
+  renderTestBanner();
+  renderHistory();
+}
+function renderTestResult(overall, skillPct, prev){
+  const wrap = document.getElementById('testBody');
+  const delta = prev ? overall - prev.overall : null;
+  wrap.innerHTML = `
+    <div class="card">
+      <h3>Результат: <span class="score-num">${overall}%</span> ${delta!==null ? `<span class="pill">${delta>=0?'▲':'▼'} ${Math.abs(delta)} п.п.</span>` : ''}</h3>
+      <div class="skill-bars">
+        ${Object.entries(skillPct).map(([k,v]) => {
+          const pdelta = prev ? v - prev.skills[k] : null;
+          return `<div class="row">
+            <span class="name">${skillLabel(k)}</span>
+            <div class="track"><i style="width:${v}%"></i></div>
+            <span class="val mono">${v}% ${pdelta!==null ? (pdelta>=0?'▲':'▼')+Math.abs(pdelta) : ''}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+function renderHistory(){
+  const history = LS.get('ew_test_history', []);
+  const historyCard = document.getElementById('historyCard');
+  if(!history.length){ historyCard.style.display = 'none'; return; }
+  historyCard.style.display = 'block';
+  const list = document.getElementById('historyList');
+  list.innerHTML = history.slice().reverse().map(h => `<li><span>${h.date}</span><span class="mono">${h.overall}%</span></li>`).join('');
+
+  const svg = document.getElementById('progressChart');
+  const W = 700, H = 140, padL = 34, padR = 14, padT = 14, padB = 24;
+  const xs = history.map((h,i) => padL + (history.length===1 ? 0 : i*(W-padL-padR)/(history.length-1)));
+  const ys = history.map(h => padT + (100-h.overall)/100*(H-padT-padB));
+  let svgHtml = `<line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="#E4D8C3" stroke-width="1"/>`;
+  svgHtml += `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="#E4D8C3" stroke-width="1"/>`;
+  if(history.length > 1){
+    const points = xs.map((x,i) => `${x},${ys[i]}`).join(' ');
+    svgHtml += `<polyline points="${points}" fill="none" stroke="#2E9C97" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+  }
+  xs.forEach((x,i) => { svgHtml += `<circle cx="${x}" cy="${ys[i]}" r="4" fill="#E8574B"/>`; });
+  svgHtml += `<text x="${padL}" y="${padT-2}" font-size="10" fill="#6B5C4C">100%</text>`;
+  svgHtml += `<text x="${padL}" y="${H-padB+12}" font-size="10" fill="#6B5C4C">0%</text>`;
+  svg.innerHTML = svgHtml;
+}
+renderHistory();
+
+/* ============ util ============ */
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+})();
+</script>
+</body>
+</html>
