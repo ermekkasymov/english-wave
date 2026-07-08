@@ -367,15 +367,29 @@
 <div class="modal-backdrop" id="settingsModal">
   <div class="modal">
     <h3>⚙️ Настройки</h3>
-    <p class="muted" style="font-size:.85rem">Нужен ключ Anthropic API (claude.com/settings/keys). Ключ хранится только в этом браузере (localStorage) и отправляется напрямую в Anthropic API — на сервер приложения он не попадает.</p>
-    <label>API-ключ Anthropic</label>
-    <input type="password" id="apiKeyInput" placeholder="sk-ant-...">
-    <label>Модель</label>
-    <select id="modelSelect">
-      <option value="claude-sonnet-5">Claude Sonnet 5 (рекомендуется)</option>
-      <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (быстрее и дешевле)</option>
-      <option value="claude-opus-4-8">Claude Opus 4.8 (самое высокое качество)</option>
+    <p class="muted" style="font-size:.85rem">Ключ хранится только в этом браузере (localStorage) и отправляется напрямую в API выбранного провайдера — на сервер приложения (и в репозиторий) он не попадает.</p>
+    <label>Провайдер</label>
+    <select id="providerSelect">
+      <option value="anthropic">Anthropic — Claude</option>
+      <option value="zai">Z.ai — GLM-5.2</option>
     </select>
+
+    <div id="providerAnthropic">
+      <label>API-ключ Anthropic (claude.com/settings/keys)</label>
+      <input type="password" id="apiKeyInput" placeholder="sk-ant-...">
+      <label>Модель</label>
+      <select id="modelSelect">
+        <option value="claude-sonnet-5">Claude Sonnet 5 (рекомендуется)</option>
+        <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (быстрее и дешевле)</option>
+        <option value="claude-opus-4-8">Claude Opus 4.8 (самое высокое качество)</option>
+      </select>
+    </div>
+
+    <div id="providerZai">
+      <label>API-ключ Z.ai (z.ai/model-api, модель GLM-5.2)</label>
+      <input type="password" id="apiKeyZaiInput" placeholder="xxxxxxxx.xxxxxxxxxxxxxxxx">
+    </div>
+
     <div class="btn-row">
       <button class="btn" id="saveSettingsBtn">Сохранить</button>
       <button class="btn ghost" id="closeSettingsBtn">Закрыть</button>
@@ -504,25 +518,45 @@ function toast(msg, type){
 
 /* ============ settings ============ */
 const settingsModal = document.getElementById('settingsModal');
+function syncProviderVisibility(){
+  const provider = document.getElementById('providerSelect').value;
+  document.getElementById('providerAnthropic').style.display = provider === 'anthropic' ? 'block' : 'none';
+  document.getElementById('providerZai').style.display = provider === 'zai' ? 'block' : 'none';
+}
 function openSettings(){
+  document.getElementById('providerSelect').value = LS.get('ew_provider', 'anthropic');
   document.getElementById('apiKeyInput').value = LS.get('ew_api_key', '') || '';
   document.getElementById('modelSelect').value = LS.get('ew_model', 'claude-sonnet-5');
+  document.getElementById('apiKeyZaiInput').value = LS.get('ew_api_key_zai', '') || '';
+  syncProviderVisibility();
   settingsModal.classList.add('open');
 }
 document.getElementById('settingsBtn').addEventListener('click', openSettings);
+document.getElementById('providerSelect').addEventListener('change', syncProviderVisibility);
 document.getElementById('closeSettingsBtn').addEventListener('click', () => settingsModal.classList.remove('open'));
 document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+  LS.set('ew_provider', document.getElementById('providerSelect').value);
   LS.set('ew_api_key', document.getElementById('apiKeyInput').value.trim());
   LS.set('ew_model', document.getElementById('modelSelect').value);
+  LS.set('ew_api_key_zai', document.getElementById('apiKeyZaiInput').value.trim());
   settingsModal.classList.remove('open');
   toast('Настройки сохранены');
 });
-if(!LS.get('ew_api_key', '')) setTimeout(openSettings, 400);
+function hasActiveKey(){
+  const provider = LS.get('ew_provider', 'anthropic');
+  return provider === 'zai' ? !!LS.get('ew_api_key_zai', '') : !!LS.get('ew_api_key', '');
+}
+if(!hasActiveKey()) setTimeout(openSettings, 400);
 
-/* ============ Claude API ============ */
+/* ============ AI provider call (Anthropic Claude / Z.ai GLM-5.2) ============ */
 async function callClaude(userPrompt, systemPrompt, maxTokens){
+  const provider = LS.get('ew_provider', 'anthropic');
+  if(provider === 'zai') return callZai(userPrompt, systemPrompt, maxTokens);
+  return callAnthropic(userPrompt, systemPrompt, maxTokens);
+}
+async function callAnthropic(userPrompt, systemPrompt, maxTokens){
   const apiKey = LS.get('ew_api_key', '');
-  if(!apiKey){ openSettings(); throw new Error('Сначала укажи API-ключ в настройках'); }
+  if(!apiKey){ openSettings(); throw new Error('Сначала укажи API-ключ Anthropic в настройках'); }
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -540,10 +574,34 @@ async function callClaude(userPrompt, systemPrompt, maxTokens){
   });
   if(!res.ok){
     const errText = await res.text().catch(()=> '');
-    throw new Error(`Ошибка API (${res.status}). Проверь ключ в настройках. ${errText.slice(0,150)}`);
+    throw new Error(`Ошибка Anthropic API (${res.status}). Проверь ключ в настройках. ${errText.slice(0,150)}`);
   }
   const data = await res.json();
   return (data.content && data.content[0] && data.content[0].text) || '';
+}
+async function callZai(userPrompt, systemPrompt, maxTokens){
+  const apiKey = LS.get('ew_api_key_zai', '');
+  if(!apiKey){ openSettings(); throw new Error('Сначала укажи API-ключ Z.ai в настройках'); }
+  let res;
+  try{
+    res = await fetch('https://api.z.ai/api/paas/v4/chat/completions', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model: 'glm-5.2',
+        max_tokens: maxTokens || 1200,
+        messages: [{ role:'system', content: systemPrompt }, { role:'user', content: userPrompt }]
+      })
+    });
+  }catch(networkErr){
+    throw new Error('Не удалось подключиться к Z.ai напрямую из браузера. Проверь соединение или попробуй провайдера Anthropic в настройках.');
+  }
+  if(!res.ok){
+    const errText = await res.text().catch(()=> '');
+    throw new Error(`Ошибка Z.ai API (${res.status}). Проверь ключ в настройках. ${errText.slice(0,150)}`);
+  }
+  const data = await res.json();
+  return (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
 }
 function extractJSON(text){
   let t = text.trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
